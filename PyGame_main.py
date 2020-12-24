@@ -9,4 +9,5 @@ if __name__ == '__main__':
     pygame.display.flip()
     while pygame.event.wait().type != pygame.QUIT:
         pass
+
     pygame.quit()
