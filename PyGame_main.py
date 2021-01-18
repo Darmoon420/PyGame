@@ -117,7 +117,8 @@ def main():
         y += block_h
         x = 0
     while running:
-        clock.tick(144)
+        clock.tick(30
+                   )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
