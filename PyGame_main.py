@@ -9,14 +9,26 @@ class Platform(sprite.Sprite):
         platform_color = "RED"
         sprite.Sprite.__init__(self)
         self.image = Surface((platform_w, platform_h))
-        self.image.fill(Color(platform_color))
+        self.image = image.load("image/block.png")
         self.rect = Rect(x, y, platform_w, platform_h)
+
+
+class Cam(object):
+    def __init__(self, camera, width, height):
+        self.camera = camera
+        self.state = Rect(0, 0, width, height)
+
+    def apply(self, target):
+        return target.rect.move(self.state.topleft)
+
+    def update(self, target):
+        self.state = self.camera(self.state, target.rect)
 
 
 class Player(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
-        self.move_speed = 5
+        self.move_speed = 10
         self.y_change = 0
         self.width = 20
         self.height = 30
@@ -27,6 +39,13 @@ class Player(sprite.Sprite):
         self.image = Surface((self.width,  self.height))
         self.image.fill(Color(color_player))
         self.rect = Rect(x, y, self.width,  self.height)
+
+    def die(self):
+        self.teleporting(self.startX, self.startY)
+
+    def teleporting(self, x, y):
+        self.rect.x = x
+        self.rect.y = y
 
     def update(self, left, right, up, down, platforms):
         if up:
@@ -67,12 +86,33 @@ class Player(sprite.Sprite):
                     self.rect.top = p.rect.bottom
                     self.y_change = 0
 
+                if isinstance(p, Trap):
+                    self.die()
+
+
+class Trap(Platform):
+    def __init__(self, x, y):
+        Platform.__init__(self, x, y)
+        self.image = image.load("image/trap_1.png")
+
+
+def camera_settings(camera, target_rect):
+    left, top = target_rect[0:2]
+    w, h = camera[-2:]
+    left, top = -left + 800 / 2, -top + 640 / 2
+    left = min(0, left)
+    left = max(-(camera.width - 800), left)
+    top = max(-(camera.height - 640), top)
+    top = min(0, top)
+
+    return Rect(left, top, w, h)
+
 
 def main():
     pygame.init()
     block_h = 30
     block_w = 30
-    size = 750, 600
+    size = 800, 640
     screen = pygame.display.set_mode(size)
     bg = Surface((800, 640))
     hero = Player(50, 50)
@@ -85,26 +125,32 @@ def main():
     platforms = []
     entities.add(hero)
     level = [
-        "-------------------------",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-                       -",
-        "-------------------------"]
+        "----------------------------------",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                *               -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "-                                -",
+        "----------------------------------"]
+    total_level_width = len(level[0]) * 30
+    total_level_height = len(level) * 30
+    camera = Cam(camera_settings, total_level_width, total_level_height)
     x = y = 0
     for row in level:
         for col in row:
@@ -112,13 +158,17 @@ def main():
                 pf = Platform(x, y)
                 entities.add(pf)
                 platforms.append(pf)
+            if col == "*":
+                bd = Trap(x, y)
+                entities.add(bd)
+                platforms.append(bd)
 
             x += block_w
         y += block_h
         x = 0
     while running:
-        clock.tick(30
-                   )
+        clock.tick(30)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -142,9 +192,17 @@ def main():
         screen.blit(bg, (0, 0))
 
         hero.update(left, right, up, down, platforms)
-        entities.draw(screen)
+        camera.update(hero)
+        for ent in entities:
+            screen.blit(ent.image, camera.apply(ent))
         pygame.display.flip()
 
 
 if __name__ == '__main__':
     main()
+    pygame.display.flip()
+    while pygame.event.wait().type != pygame.QUIT:
+        pass
+
+    pygame.quit()
+
