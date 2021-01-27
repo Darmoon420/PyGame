@@ -29,6 +29,8 @@ class Player(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.move_speed = 10
+        self.win = False
+        self.life = False
         self.y_change = 0
         self.width = 20
         self.height = 30
@@ -46,6 +48,7 @@ class Player(sprite.Sprite):
     def teleporting(self, x, y):
         self.rect.x = x
         self.rect.y = y
+
 
     def update(self, left, right, up, down, platforms):
         if up:
@@ -88,12 +91,22 @@ class Player(sprite.Sprite):
 
                 if isinstance(p, Trap):
                     self.die()
+                    self.life = True
+
+                elif isinstance(p, WinBlock):  # если коснулись принцессы
+                    self.win = True
 
 
 class Trap(Platform):
     def __init__(self, x, y):
         Platform.__init__(self, x, y)
         self.image = image.load("image/trap_1.png")
+
+
+class WinBlock(Platform):
+    def __init__(self, x, y):
+        Platform.__init__(self, x, y)
+        self.image = image.load("image/chest.png")
 
 
 def camera_settings(camera, target_rect):
@@ -115,7 +128,7 @@ def main():
     size = 800, 640
     screen = pygame.display.set_mode(size)
     bg = Surface((800, 640))
-    hero = Player(50, 50)
+    hero = Player(30, 30)
     left = right = up = down = False
     bg.fill(Color("BLACK"))
     pygame.display.set_caption("Mario")
@@ -123,6 +136,7 @@ def main():
     running = True
     entities = pygame.sprite.Group()
     platforms = []
+
     entities.add(hero)
     level = [
         "----------------------------------",
@@ -141,7 +155,7 @@ def main():
         "-                                -",
         "-                                -",
         "-                                -",
-        "-                                -",
+        "-                     W          -",
         "-                                -",
         "-                                -",
         "-                                -",
@@ -155,13 +169,17 @@ def main():
     for row in level:
         for col in row:
             if col == "-":
-                pf = Platform(x, y)
-                entities.add(pf)
-                platforms.append(pf)
+                block = Platform(x, y)
+                entities.add(block)
+                platforms.append(block)
             if col == "*":
-                bd = Trap(x, y)
-                entities.add(bd)
-                platforms.append(bd)
+                trap = Trap(x, y)
+                entities.add(trap)
+                platforms.append(trap)
+            if col == "W":
+                win = WinBlock(x, y)
+                entities.add(win)
+                platforms.append(win)
 
             x += block_w
         y += block_h
@@ -196,6 +214,26 @@ def main():
         for ent in entities:
             screen.blit(ent.image, camera.apply(ent))
         pygame.display.flip()
+        if hero.win:
+            font = pygame.font.Font(None, 150)
+            text = font.render("YOU WIN", True, ("BlUE"))
+            text_x = size[0] // 2 - text.get_width() // 2
+            text_y = size[1] // 2 - text.get_height() // 2
+            screen.blit(text, (text_x, text_y))
+            pygame.display.flip()
+            time.wait(3600)
+            hero.die()
+            hero.win = False
+        if hero.life:
+            font = pygame.font.Font(None, 150)
+            text = font.render("YOU DIED", True, ("RED"))
+            text_x = size[0] // 2 - text.get_width() // 2
+            text_y = size[1] // 2 - text.get_height() // 2
+            screen.blit(text, (text_x, text_y))
+            pygame.display.flip()
+            time.wait(1200)
+            hero.die()
+            hero.life = False
 
 
 if __name__ == '__main__':
