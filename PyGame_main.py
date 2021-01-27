@@ -6,7 +6,6 @@ class Platform(sprite.Sprite):
     def __init__(self, x, y):
         platform_w = 30
         platform_h = 30
-        platform_color = "RED"
         sprite.Sprite.__init__(self)
         self.image = Surface((platform_w, platform_h))
         self.image = image.load("image/block.png")
@@ -48,7 +47,6 @@ class Player(sprite.Sprite):
     def teleporting(self, x, y):
         self.rect.x = x
         self.rect.y = y
-
 
     def update(self, left, right, up, down, platforms):
         if up:
@@ -93,7 +91,7 @@ class Player(sprite.Sprite):
                     self.die()
                     self.life = True
 
-                elif isinstance(p, WinBlock):  # если коснулись принцессы
+                elif isinstance(p, WinBlock):
                     self.win = True
 
 
@@ -216,7 +214,7 @@ def main():
         pygame.display.flip()
         if hero.win:
             font = pygame.font.Font(None, 150)
-            text = font.render("YOU WIN", True, ("BlUE"))
+            text = font.render("YOU WIN", True, "BlUE")
             text_x = size[0] // 2 - text.get_width() // 2
             text_y = size[1] // 2 - text.get_height() // 2
             screen.blit(text, (text_x, text_y))
@@ -226,7 +224,7 @@ def main():
             hero.win = False
         if hero.life:
             font = pygame.font.Font(None, 150)
-            text = font.render("YOU DIED", True, ("RED"))
+            text = font.render("YOU DIED", True, "RED")
             text_x = size[0] // 2 - text.get_width() // 2
             text_y = size[1] // 2 - text.get_height() // 2
             screen.blit(text, (text_x, text_y))
