@@ -55,6 +55,7 @@ class Player(sprite.Sprite):
 
         up_anim = [('image/up.png', 1)]
         stay_anim = [('image/stay.png', 1)]
+        fon = [('image/fon.png', 1)]
         bolt_anim = []
 
         for anim in right_anim:
@@ -164,6 +165,7 @@ def camera_settings(camera, target_rect):
 
 
 def main():
+    fon = image.load('image/fon.png')
     pygame.init()
     block_h = 30
     block_w = 30
@@ -182,15 +184,15 @@ def main():
     entities.add(hero)
     level = [
         "----------------------------------",
-        "---             - -             --",
+        "---*           *- -*            --",
         "------ -- ---   - -   --- -- -- --",
         "-      --  --         --- -- --*--",
-        "- --------  ----- -----   --     -",
-        "-        -      - -   - ----- -- -",
-        "-------- --- ---- - -       -    -",
+        "- --------  ----- -----   --    *-",
+        "-*       -     *- -   - ----- -- -",
+        "-------- --- ---- - -       -  * -",
         "-        --   --- - ------- -- ---",
         "---- --- -- - --- - ------  --   -",
-        "-               - -        --    -",
+        "-              *- -        --   *-",
         "- ------ -------- -            - -",
         "- ------ -      - --------- ---- -",
         "- ------ - -  - - -          --  -",
@@ -200,9 +202,9 @@ def main():
         "- ------ - -  - - - - - - - - -  -",
         "- -      - -  - - - - - - - - -  -",
         "- - ------ -  - - - - - - - - -  -",
-        "- -        -  - - -   -   -   -  -",
+        "- -        -**- - -   -   -   -* -",
         "- ------------- -*-------------- -",
-        "-       ------- *W               -",
+        "-      *------- *W               -",
         "----------------------------------"]
     total_level_width = len(level[0]) * 30
     total_level_height = len(level) * 30
@@ -255,6 +257,7 @@ def main():
         camera.update(hero)
         for ent in entities:
             screen.blit(ent.image, camera.apply(ent))
+        screen.blit(fon, (camera.apply(hero)[0] - 1000, camera.apply(hero)[1] - 950))
         pygame.display.flip()
         if hero.win:
             font = pygame.font.Font(None, 150)
