@@ -1,5 +1,6 @@
 ﻿import pygame
 from pygame import *
+import pyganim
 
 
 class Platform(sprite.Sprite):
@@ -26,8 +27,7 @@ class Cam(object):
 
 class Player(sprite.Sprite):
     def __init__(self, x, y):
-        sprite.Sprite.__init__(self)
-        self.move_speed = 10
+        self.move_speed = 5
         self.win = False
         self.life = False
         self.y_change = 0
@@ -40,6 +40,43 @@ class Player(sprite.Sprite):
         self.image = Surface((self.width,  self.height))
         self.image.fill(Color(color_player))
         self.rect = Rect(x, y, self.width,  self.height)
+        color_fon = "BLACK"
+        self.image = Surface((800, 640))
+        self.image.fill(Color(color_fon))
+        self.image.set_colorkey(Color(color_fon))
+        speed_anim = 60
+        left_anim = [('image/left_1.png'),
+                     ('image/left_2.png'),
+                     ('image/left_3.png')]
+
+        right_anim = [('image/right_1.png'),
+                      ('image/right_2.png'),
+                      ('image/right_3.png')]
+
+        up_anim = [('image/up.png', 1)]
+        stay_anim = [('image/stay.png', 1)]
+        bolt_anim = []
+
+        for anim in right_anim:
+            bolt_anim.append((anim, speed_anim))
+
+        self.boltAnimRight = pyganim.PygAnimation(bolt_anim)
+        self.boltAnimRight.play()
+        print(bolt_anim)
+        bolt_anim = []
+        for anim in left_anim:
+            bolt_anim.append((anim, speed_anim))
+        self.boltAnimLeft = pyganim.PygAnimation(bolt_anim)
+        self.boltAnimLeft.play()
+
+        self.boltAnimStay = pyganim.PygAnimation(stay_anim)
+        self.boltAnimStay.play()
+        self.boltAnimStay.blit(self.image, (0, 0))
+
+        self.boltAnimJump = pyganim.PygAnimation(up_anim)
+        self.boltAnimJump.play()
+
+        sprite.Sprite.__init__(self)
 
     def die(self):
         self.teleporting(self.startX, self.startY)
@@ -49,19 +86,26 @@ class Player(sprite.Sprite):
         self.rect.y = y
 
     def update(self, left, right, up, down, platforms):
+        color = "BLACK"
         if up:
             self.y_change = -self.move_speed
+            self.image.fill(Color(color))
+            self.boltAnimJump.blit(self.image, (0, 0))
         if down:
             self.y_change = self.move_speed
         if left:
             self.x_change = -self.move_speed
+            self.image.fill(Color(color))
+            self.boltAnimLeft.blit(self.image, (0, 0))
         if right:
             self.x_change = self.move_speed
-
-        if not (left or right):
+            self.image.fill(Color(color))
+            self.boltAnimRight.blit(self.image, (0, 0))
+        if not (left or right or down or up):
             self.x_change = 0
-        if not (up or down):
             self.y_change = 0
+            self.image.fill(Color(color))
+            self.boltAnimStay.blit(self.image, (0, 0))
 
         self.rect.y += self.y_change
         self.collide(0, self.y_change, platforms)
@@ -126,7 +170,7 @@ def main():
     size = 800, 640
     screen = pygame.display.set_mode(size)
     bg = Surface((800, 640))
-    hero = Player(30, 30)
+    hero = Player(510, 30)
     left = right = up = down = False
     bg.fill(Color("BLACK"))
     pygame.display.set_caption("Mario")
@@ -138,27 +182,27 @@ def main():
     entities.add(hero)
     level = [
         "----------------------------------",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                *               -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                     W          -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
-        "-                                -",
+        "---             - -             --",
+        "------ -- ---   - -   --- -- -- --",
+        "-      --  --         --- -- --*--",
+        "- --------  ----- -----   --     -",
+        "-        -      - -   - ----- -- -",
+        "-------- --- ---- - -       -    -",
+        "-        --   --- - ------- -- ---",
+        "---- --- -- - --- - ------  --   -",
+        "-               - -        --    -",
+        "- ------ -------- -            - -",
+        "- ------ -      - --------- ---- -",
+        "- ------ - -  - - -          --  -",
+        "- ------ - -  - - - --------------",
+        "- ------ - -  - - - -   -   -    -",
+        "- ------ - -  - - - - - - - - -  -",
+        "- ------ - -  - - - - - - - - -  -",
+        "- -      - -  - - - - - - - - -  -",
+        "- - ------ -  - - - - - - - - -  -",
+        "- -        -  - - -   -   -   -  -",
+        "- ------------- -*-------------- -",
+        "-       ------- *W               -",
         "----------------------------------"]
     total_level_width = len(level[0]) * 30
     total_level_height = len(level) * 30
