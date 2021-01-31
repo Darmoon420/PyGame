@@ -1,4 +1,4 @@
-﻿import pygame
+import pygame
 from pygame import *
 import pyganim
 
@@ -180,7 +180,8 @@ def main():
     running = True
     entities = pygame.sprite.Group()
     platforms = []
-
+    mixer.music.load("sounds/main_theme.mp3")
+    mixer.music.play(-1)
     entities.add(hero)
     level = [
         "----------------------------------",
@@ -228,6 +229,7 @@ def main():
             x += block_w
         y += block_h
         x = 0
+        flPause = False
     while running:
         clock.tick(30)
 
@@ -250,6 +252,12 @@ def main():
                 left = False
             if event.type == KEYUP and event.key == K_DOWN:
                 down = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                flPause = not flPause
+                if flPause:
+                    mixer.music.pause()
+                else:
+                    mixer.music.unpause()
 
         screen.blit(bg, (0, 0))
 
