@@ -1,6 +1,70 @@
 import pygame
 from pygame import *
 import pyganim
+import sys
+
+info = pygame.Surface((800, 30))
+screen = pygame.Surface((800, 640))
+window = pygame.display.set_mode((800, 670))
+
+
+class Menu:
+    def __init__(self, buttons=[]):
+        self.button = buttons
+
+    def render(self, surface, font, num_punkt):
+        for i in self.button:
+            if num_punkt == i[5]:
+                surface.blit(font.render(i[2], 1, i[4]), (i[0], i[1] - 30))
+            else:
+                surface.blit(font.render(i[2], 1, i[3]), (i[0], i[1] - 30))
+
+    def menu(self):
+        flag = False
+        done = True
+        font_menu = pygame.font.Font(None, 50)
+        pygame.key.set_repeat(0, 0)
+        pygame.mouse.set_visible(True)
+        button = 0
+        while done:
+            info.fill((255, 255, 255))
+            screen.fill((255, 255, 255))
+
+            mouse_pos = pygame.mouse.get_pos()
+            for i in self.button:
+                if mouse_pos[0] > i[0] and mouse_pos[0] < i[0] + 155 and mouse_pos[1] > i[1] and mouse_pos[1] < i[1] + 50:
+                    button = i[5]
+            self.render(screen, font_menu, button)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        done = False
+                    if event.key == pygame.K_UP:
+                        if button > 0:
+                            button -= 1
+                    if event.key == pygame.K_DOWN:
+                        if button < len(self.button) - 1:
+                            button += 1
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if button == 0:
+                        done = False
+                        self.new_game = False
+                    elif button == 1:
+                        exit()
+                    elif button == 2:
+                        flag = not flag
+                        if flag:
+                            mixer.music.pause()
+                        else:
+                            mixer.music.unpause()
+                    elif button == 3:
+                        self.new_game = True
+                        done = False
+            window.blit(info, (0, 0))
+            window.blit(screen, (0, 30))
+            pygame.display.flip()
 
 
 class Platform(sprite.Sprite):
@@ -63,7 +127,6 @@ class Player(sprite.Sprite):
 
         self.boltAnimRight = pyganim.PygAnimation(bolt_anim)
         self.boltAnimRight.play()
-        print(bolt_anim)
         bolt_anim = []
         for anim in left_anim:
             bolt_anim.append((anim, speed_anim))
@@ -207,6 +270,12 @@ def main():
         "- ------------- -*-------------- -",
         "-      *------- *W               -",
         "----------------------------------"]
+    punkts = [(350, 260, 'Play', (11, 0, 77), (226, 139, 0), 0),
+              (350, 300, 'Exit', (11, 0, 77), (226, 139, 0), 1),
+              (350, 340, 'Music', (11, 0, 77), (226, 139, 0), 2),
+              (350, 380, 'Level 1', (11, 0, 77), (226, 139, 0), 3)]
+    game = Menu(punkts)
+    game.menu()
     total_level_width = len(level[0]) * 30
     total_level_height = len(level) * 30
     camera = Cam(camera_settings, total_level_width, total_level_height)
@@ -229,7 +298,7 @@ def main():
             x += block_w
         y += block_h
         x = 0
-        flPause = False
+        pause = False
     while running:
         clock.tick(30)
 
@@ -253,11 +322,14 @@ def main():
             if event.type == KEYUP and event.key == K_DOWN:
                 down = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                flPause = not flPause
-                if flPause:
+                pause = not pause
+                if pause:
                     mixer.music.pause()
                 else:
                     mixer.music.unpause()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    game.menu()
 
         screen.blit(bg, (0, 0))
 
@@ -267,6 +339,9 @@ def main():
             screen.blit(ent.image, camera.apply(ent))
         screen.blit(fon, (camera.apply(hero)[0] - 1000, camera.apply(hero)[1] - 950))
         pygame.display.flip()
+        if game.new_game:
+            hero.die()
+            game.new_game = False
         if hero.win:
             font = pygame.font.Font(None, 150)
             text = font.render("YOU WIN", True, "BlUE")
@@ -291,5 +366,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
