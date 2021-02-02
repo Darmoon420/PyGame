@@ -9,11 +9,17 @@ window = pygame.display.set_mode((800, 670))
 
 
 class Menu:
+    """
+    Класс меню, который отображается в начале и при нажатии Esc.
+    """
     def __init__(self, buttons=[]):
         self.button = buttons
-        self.map = 0
+        self.map = 0  #
 
     def render(self, surface, font, num_punkt):
+        """
+        Функция отображения меню.
+        """
         for i in self.button:
             if num_punkt == i[5]:
                 surface.blit(font.render(i[2], 1, i[4]), (i[0], i[1] - 30))
@@ -21,6 +27,9 @@ class Menu:
                 surface.blit(font.render(i[2], 1, i[3]), (i[0], i[1] - 30))
 
     def menu(self):
+        """
+        Функция в которой происхожит основная работа меню.
+        """
         flag = False
         done = True
         font_menu = pygame.font.Font(None, 50)
@@ -76,6 +85,9 @@ class Menu:
 
 
 class Platform(sprite.Sprite):
+    """
+    Класс блоков из которых состоит лабиринт.
+    """
     def __init__(self, x, y):
         platform_w = 30
         platform_h = 30
@@ -86,6 +98,9 @@ class Platform(sprite.Sprite):
 
 
 class Cam(object):
+    """
+    Класс камеры, которая следует за персонажем.
+    """
     def __init__(self, camera, width, height):
         self.camera = camera
         self.state = Rect(0, 0, width, height)
@@ -98,6 +113,10 @@ class Cam(object):
 
 
 class Player(sprite.Sprite):
+    """
+    Класс персонажа.
+    Создает персонаж и устанавливаются его характеристики.
+    """
     def __init__(self, x, y):
         self.move_speed = 5
         self.win = False
@@ -127,7 +146,6 @@ class Player(sprite.Sprite):
 
         up_anim = [('image/up.png', 1)]
         stay_anim = [('image/stay.png', 1)]
-        fon = [('image/fon.png', 1)]
         bolt_anim = []
 
         for anim in right_anim:
@@ -151,13 +169,22 @@ class Player(sprite.Sprite):
         sprite.Sprite.__init__(self)
 
     def die(self):
+        """
+        Переносит игрока в начальные координаты.
+        """
         self.teleporting(self.startX, self.startY)
 
     def teleporting(self, x, y):
+        """
+        Телепортирует игрока в полученные координаты.
+        """
         self.rect.x = x
         self.rect.y = y
 
     def update(self, left, right, up, down, platforms):
+        """
+        Обновление координат персонажа.
+        """
         color = "BLACK"
         if up:
             self.y_change = -self.move_speed
@@ -186,6 +213,9 @@ class Player(sprite.Sprite):
         self.collide(self.x_change, 0, platforms)
 
     def collide(self, x_change, y_change, platforms):
+        """
+        Проверка на столкновение игрока и объектов.
+        """
         for p in platforms:
             if sprite.collide_rect(self, p):
 
@@ -212,18 +242,27 @@ class Player(sprite.Sprite):
 
 
 class Trap(Platform):
+    """
+    Класс ловушки, которая взаимодействует с игроком.
+    """
     def __init__(self, x, y):
         Platform.__init__(self, x, y)
         self.image = image.load("image/trap_1.png")
 
 
 class WinBlock(Platform):
+    """
+    Класс финиша.
+    """
     def __init__(self, x, y):
         Platform.__init__(self, x, y)
         self.image = image.load("image/chest.png")
 
 
 def camera_settings(camera, target_rect):
+    """
+    Основные параметры камеры.
+    """
     left, top = target_rect[0:2]
     w, h = camera[-2:]
     left, top = -left + 800 / 2, -top + 640 / 2
@@ -236,6 +275,9 @@ def camera_settings(camera, target_rect):
 
 
 def main():
+    """
+    Основная функия программы.
+    """
     fon = image.load('image/fon.png')
     pygame.init()
     block_h = 30
@@ -375,7 +417,7 @@ def main():
             if game.map == 1:
                 game.map = 0
                 x = y = 0
-                for row in level:
+                for row in level_1:
                     for col in row:
                         if col == "-":
                             block = Platform(x, y)
@@ -400,7 +442,7 @@ def main():
             elif game.map == 2:
                 game.map = 0
                 x = y = 0
-                for row in level_1:
+                for row in level:
                     for col in row:
                         if col == "-":
                             block = Platform(x, y)
