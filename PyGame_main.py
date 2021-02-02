@@ -11,6 +11,7 @@ window = pygame.display.set_mode((800, 670))
 class Menu:
     def __init__(self, buttons=[]):
         self.button = buttons
+        self.map = 0
 
     def render(self, surface, font, num_punkt):
         for i in self.button:
@@ -26,6 +27,7 @@ class Menu:
         pygame.key.set_repeat(0, 0)
         pygame.mouse.set_visible(True)
         button = 0
+
         while done:
             info.fill((255, 255, 255))
             screen.fill((255, 255, 255))
@@ -35,6 +37,7 @@ class Menu:
                 if mouse_pos[0] > i[0] and mouse_pos[0] < i[0] + 155 and mouse_pos[1] > i[1] and mouse_pos[1] < i[1] + 50:
                     button = i[5]
             self.render(screen, font_menu, button)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -61,6 +64,11 @@ class Menu:
                             mixer.music.unpause()
                     elif button == 3:
                         self.new_game = True
+                        self.map = 1
+                        done = False
+                    elif button == 4:
+                        self.new_game = True
+                        self.map = 2
                         done = False
             window.blit(info, (0, 0))
             window.blit(screen, (0, 30))
@@ -242,11 +250,24 @@ def main():
     clock = pygame.time.Clock()
     running = True
     entities = pygame.sprite.Group()
+    entities_1 = pygame.sprite.Group()
+    entities_2 = pygame.sprite.Group()
     platforms = []
+    platforms_1 = []
+    platforms_2 = []
     mixer.music.load("sounds/main_theme.mp3")
     mixer.music.play(-1)
     entities.add(hero)
-    level = [
+    entities_2.add(hero)
+    entities_1.add(hero)
+    punkts = [(350, 230, 'Play', (11, 0, 77), (226, 139, 0), 0),
+              (350, 270, 'Exit', (11, 0, 77), (226, 139, 0), 1),
+              (350, 310, 'Music', (11, 0, 77), (226, 139, 0), 2),
+              (350, 350, 'Level 1', (11, 0, 77), (226, 139, 0), 3),
+              (350, 390, 'Level 2', (11, 0, 77), (226, 139, 0), 4)]
+    game = Menu(punkts)
+    game.menu()
+    level_1 = [
         "----------------------------------",
         "---*           *- -*            --",
         "------ -- ---   - -   --- -- -- --",
@@ -270,17 +291,32 @@ def main():
         "- ------------- -*-------------- -",
         "-      *------- *W               -",
         "----------------------------------"]
-    punkts = [(350, 260, 'Play', (11, 0, 77), (226, 139, 0), 0),
-              (350, 300, 'Exit', (11, 0, 77), (226, 139, 0), 1),
-              (350, 340, 'Music', (11, 0, 77), (226, 139, 0), 2),
-              (350, 380, 'Level 1', (11, 0, 77), (226, 139, 0), 3)]
-    game = Menu(punkts)
-    game.menu()
-    total_level_width = len(level[0]) * 30
-    total_level_height = len(level) * 30
-    camera = Cam(camera_settings, total_level_width, total_level_height)
+    level = [
+        "----------------------------------",
+        "--             -- -             --",
+        "--   --- -- -- -- -   --- -- -- --",
+        "-    --- -- --*--     --- -- --*--",
+        "-- -       -    - -----   --     -",
+        "-    *   -        -   - ----- -- -",
+        "-- ----- --- ---- - -       -    -",
+        "-  ----- ---- --- - ------- -- ---",
+        "-    --- ---- --- - ------  --   -",
+        "- ------  --   -  -       -      -",
+        "- -*  -- -------- -            - -",
+        "- --- -- -      - --------- ---- -",
+        "- --- -- - -  - - -          --* -",
+        "- --- -- - -  - - - --------------",
+        "- --- -- - -  - - -   -   -      -",
+        "- --- -- - -  - - - - - - - - -  -",
+        "- --- -- - -  - - - - - - - - -  -",
+        "- -      - -  - - - - - - - - -  -",
+        "- - ------ -  - - - - - - - - -  -",
+        "- -        -**- - -   -   -   -  -",
+        "- ------------- - -------------- -",
+        "-       ------- *W*              -",
+        "----------------------------------"]
     x = y = 0
-    for row in level:
+    for row in level_1:
         for col in row:
             if col == "-":
                 block = Platform(x, y)
@@ -298,7 +334,12 @@ def main():
             x += block_w
         y += block_h
         x = 0
-        pause = False
+
+    total_level_width = len(level[0]) * 30
+    total_level_height = len(level) * 30
+    camera = Cam(camera_settings, total_level_width, total_level_height)
+
+    pause = False
     while running:
         clock.tick(30)
 
@@ -331,12 +372,61 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     game.menu()
 
-        screen.blit(bg, (0, 0))
+            if game.map == 1:
+                game.map = 0
+                x = y = 0
+                for row in level:
+                    for col in row:
+                        if col == "-":
+                            block = Platform(x, y)
+                            entities_1.add(block)
+                            platforms_1.append(block)
+                        if col == "*":
+                            trap = Trap(x, y)
+                            entities_1.add(trap)
+                            platforms_1.append(trap)
+                        if col == "W":
+                            win = WinBlock(x, y)
+                            entities_1.add(win)
+                            platforms_1.append(win)
 
-        hero.update(left, right, up, down, platforms)
-        camera.update(hero)
+                        x += block_w
+                    y += block_h
+                    x = 0
+
+                entities = entities_1
+                platforms = platforms_1
+
+            elif game.map == 2:
+                game.map = 0
+                x = y = 0
+                for row in level_1:
+                    for col in row:
+                        if col == "-":
+                            block = Platform(x, y)
+                            entities_2.add(block)
+                            platforms_2.append(block)
+                        if col == "*":
+                            trap = Trap(x, y)
+                            entities_2.add(trap)
+                            platforms_2.append(trap)
+                        if col == "W":
+                            win = WinBlock(x, y)
+                            entities_2.add(win)
+                            platforms_2.append(win)
+
+                        x += block_w
+                    y += block_h
+                    x = 0
+
+                entities = entities_2
+                platforms = platforms_2
+
+        screen.blit(bg, (0, 0))
         for ent in entities:
             screen.blit(ent.image, camera.apply(ent))
+        hero.update(left, right, up, down, platforms)
+        camera.update(hero)
         screen.blit(fon, (camera.apply(hero)[0] - 1000, camera.apply(hero)[1] - 950))
         pygame.display.flip()
         if game.new_game:
