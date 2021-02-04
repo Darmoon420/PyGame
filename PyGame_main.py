@@ -301,7 +301,7 @@ def main():
     platforms = []
     platforms_1 = []
     platforms_2 = []
-    mixer.music.load("sounds/main_theme.mp3")
+    mixer.music.load("sounds/main_theme.ogg")
     mixer.music.play(-1)
     entities.add(hero)
     entities_2.add(hero)
