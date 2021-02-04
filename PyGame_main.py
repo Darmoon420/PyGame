@@ -14,7 +14,7 @@ class Menu:
     """
     def __init__(self, buttons=[]):
         self.button = buttons
-        self.map = 0  #
+        self.map = 0
 
     def render(self, surface, font, num_punkt):
         """
@@ -118,6 +118,7 @@ class Player(sprite.Sprite):
     Создает персонаж и устанавливаются его характеристики.
     """
     def __init__(self, x, y):
+        self.level = 0
         self.move_speed = 5
         self.win = False
         self.life = False
@@ -239,6 +240,7 @@ class Player(sprite.Sprite):
 
                 elif isinstance(p, WinBlock):
                     self.win = True
+                    self.level = 2
 
 
 class Trap(Platform):
@@ -257,6 +259,8 @@ class WinBlock(Platform):
     def __init__(self, x, y):
         Platform.__init__(self, x, y)
         self.image = image.load("image/chest.png")
+
+
 
 
 def camera_settings(camera, target_rect):
@@ -439,8 +443,9 @@ def main():
                 entities = entities_1
                 platforms = platforms_1
 
-            elif game.map == 2:
+            elif game.map == 2 or hero.level == 2:
                 game.map = 0
+                hero.level = 0
                 x = y = 0
                 for row in level:
                     for col in row:
