@@ -1,6 +1,5 @@
 import pygame
-from pygame import *
-import pyganim
+from pygame import *import pyganim
 import sys
 
 info = pygame.Surface((800, 30))
@@ -380,11 +379,11 @@ def main():
             x += block_w
         y += block_h
         x = 0
-
+    run_music = pygame.mixer.Sound("sounds/run.ogg")
     total_level_width = len(level[0]) * 30
     total_level_height = len(level) * 30
     camera = Cam(camera_settings, total_level_width, total_level_height)
-
+    flag_music = False
     pause = False
     while running:
         clock.tick(30)
@@ -416,6 +415,8 @@ def main():
                     mixer.music.unpause()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    run_music.stop()
+                    flag_music = False
                     game.menu()
 
             if game.map == 1:
@@ -473,13 +474,25 @@ def main():
         for ent in entities:
             screen.blit(ent.image, camera.apply(ent))
         hero.update(left, right, up, down, platforms)
+        if (left or right or up or down) == True:
+            if flag_music == False:
+                run_music.play(-1)
+                flag_music = True
+        else:
+            run_music.stop()
+            flag_music = False
         camera.update(hero)
         screen.blit(fon, (camera.apply(hero)[0] - 1000, camera.apply(hero)[1] - 950))
         pygame.display.flip()
         if game.new_game:
+            run_music.stop()
+            flag_music = False
             hero.die()
             game.new_game = False
+
         if hero.win:
+            run_music.stop()
+            flag_music = False
             font = pygame.font.Font(None, 150)
             text = font.render("YOU WIN", True, "BlUE")
             text_x = size[0] // 2 - text.get_width() // 2
@@ -489,7 +502,10 @@ def main():
             time.wait(3600)
             hero.die()
             hero.win = False
+
         if hero.life:
+            run_music.stop()
+            flag_music = False
             font = pygame.font.Font(None, 150)
             text = font.render("YOU DIED", True, "RED")
             text_x = size[0] // 2 - text.get_width() // 2
@@ -499,6 +515,7 @@ def main():
             time.wait(1200)
             hero.die()
             hero.life = False
+
 
 
 if __name__ == '__main__':
