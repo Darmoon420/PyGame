@@ -1,5 +1,6 @@
 import pygame
-from pygame import *import pyganim
+from pygame import *
+import pyganim
 import sys
 
 info = pygame.Surface((800, 30))
